@@ -39,11 +39,6 @@ BUTTON_DESCRIPTIONS = [
         "icon": "mdi:lock",
     },
     {
-        "key": "take_screenshot",
-        "name": "Take Screenshot",
-        "icon": "mdi:camera",
-    },
-    {
         "key": "logoff",
         "name": "Log Off",
         "icon": "mdi:logout",
