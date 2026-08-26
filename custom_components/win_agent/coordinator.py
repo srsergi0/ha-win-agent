@@ -35,25 +35,34 @@ class WinAgentCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             name=f"{DOMAIN}_{device_id}",
         )
 
+    def _matches_device(self, target_id: Any) -> bool:
+        """Check if incoming event targets this coordinator."""
+        if not target_id or target_id == "all":
+            return True
+        t = str(target_id).strip().lower()
+        d = str(self.device_id).strip().lower()
+        return t == d or t in d or d in t
+
     async def async_setup(self) -> None:
         """Subscribe to Home Assistant event bus for incoming PC updates."""
         @callback
         def handle_telemetry_event(event: Event) -> None:
             data = event.data or {}
             target_id = data.get("device_id")
-            if not target_id or target_id == self.device_id:
+            if self._matches_device(target_id):
                 incoming_sensors = data.get("sensors", {})
-                self.sensor_data.update(incoming_sensors)
-                self.async_set_updated_data(dict(self.sensor_data))
-                async_dispatcher_send(self.hass, SIGNAL_WIN_AGENT_UPDATE.format(self.device_id))
+                if incoming_sensors:
+                    self.sensor_data.update(incoming_sensors)
+                    self.async_set_updated_data(dict(self.sensor_data))
+                    async_dispatcher_send(self.hass, SIGNAL_WIN_AGENT_UPDATE.format(self.device_id))
 
         @callback
         def handle_state_update_event(event: Event) -> None:
             data = event.data or {}
             target_id = data.get("device_id")
-            if not target_id or target_id == self.device_id:
+            if self._matches_device(target_id):
                 key = data.get("key") or data.get("entity_key")
-                val = data.get("state") or data.get("value")
+                val = data.get("state") if "state" in data else data.get("value")
                 if key is not None:
                     self.sensor_data[key] = val
                     self.async_set_updated_data(dict(self.sensor_data))
