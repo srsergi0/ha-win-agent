@@ -66,13 +66,6 @@ SENSOR_DESCRIPTIONS = [
         "icon": "mdi:music",
     },
     {
-        "key": "audio_volume",
-        "name": "Master Volume",
-        "icon": "mdi:volume-high",
-        "unit": PERCENTAGE,
-        "state_class": SensorStateClass.MEASUREMENT,
-    },
-    {
         "key": "idle_time",
         "name": "User Idle Time",
         "icon": "mdi:timer-sand",
