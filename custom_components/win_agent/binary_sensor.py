@@ -47,11 +47,6 @@ BINARY_SENSOR_DESCRIPTIONS = [
         "icon": "mdi:power-plug",
         "device_class": BinarySensorDeviceClass.PLUG,
     },
-    {
-        "key": "audio_mute",
-        "name": "Audio Muted",
-        "icon": "mdi:volume-mute",
-    },
 ]
 
 async def async_setup_entry(
