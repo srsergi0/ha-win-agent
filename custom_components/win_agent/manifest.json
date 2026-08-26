@@ -1,0 +1,13 @@
+{
+  "domain": "win_agent",
+  "name": "Windows Direct Agent",
+  "codeowners": ["@srsergi0"],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/srsergi0/ha-win-agent",
+  "integration_type": "device",
+  "iot_class": "local_push",
+  "issue_tracker": "https://github.com/srsergi0/ha-win-agent/issues",
+  "requirements": [],
+  "version": "1.0.0"
+}

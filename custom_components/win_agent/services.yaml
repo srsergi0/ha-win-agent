@@ -1,0 +1,85 @@
+show_dialog:
+  name: Show Confirmation Dialog
+  description: Displays a custom Glassmorphic confirmation dialog window on the Windows PC with interactive buttons.
+  fields:
+    title:
+      name: Title
+      description: The title header of the dialog window.
+      required: true
+      example: "Security Alert"
+      selector:
+        text:
+    message:
+      name: Message
+      description: The main message prompt for the user.
+      required: true
+      example: "Do you want to turn on study lighting?"
+      selector:
+        text:
+          multiline: true
+    timeout_sec:
+      name: Timeout (seconds)
+      description: Auto-close countdown timeout in seconds.
+      required: false
+      default: 30
+      selector:
+        number:
+          min: 5
+          max: 300
+          unit_of_measurement: "s"
+
+send_notification:
+  name: Send Windows Notification
+  description: Shows a native Windows Toast Notification popup on the PC desktop.
+  fields:
+    title:
+      name: Title
+      description: Notification banner title.
+      required: true
+      example: "Home Assistant"
+      selector:
+        text:
+    message:
+      name: Message
+      description: Notification message body.
+      required: true
+      example: "Front door motion detected."
+      selector:
+        text:
+
+launch_url:
+  name: Launch URL
+  description: Opens a URL in the default web browser on the Windows PC.
+  fields:
+    url:
+      name: URL
+      description: Web address to open.
+      required: true
+      example: "https://home-assistant.io"
+      selector:
+        text:
+
+send_keys:
+  name: Send Keystroke
+  description: Simulates keystrokes or shortcut combinations on the Windows PC.
+  fields:
+    keys:
+      name: Keys
+      description: Keys or keystroke string (e.g. ^{ESC}, {F11}, Hello).
+      required: true
+      example: "{F11}"
+      selector:
+        text:
+
+run_powershell:
+  name: Run PowerShell Script
+  description: Executes an arbitrary PowerShell command or script on the Windows PC.
+  fields:
+    script:
+      name: Script
+      description: PowerShell script to execute.
+      required: true
+      example: "Get-Process | Select-Object -First 5"
+      selector:
+        text:
+          multiline: true
