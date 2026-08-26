@@ -50,9 +50,7 @@ class WinAgentVolumeNumber(CoordinatorEntity[WinAgentCoordinator], NumberEntity)
     @property
     def native_value(self) -> float | None:
         """Return the current volume value."""
-        if not self.coordinator.data:
-            return None
-        val = self.coordinator.data.get("audio_volume")
+        val = self.coordinator.sensor_data.get("audio_volume")
         try:
             return float(val) if val is not None else None
         except (ValueError, TypeError):
@@ -60,5 +58,6 @@ class WinAgentVolumeNumber(CoordinatorEntity[WinAgentCoordinator], NumberEntity)
 
     async def async_set_native_value(self, value: float) -> None:
         """Set the volume value."""
-        await self.coordinator.async_send_action("set_volume", {"volume": int(value)})
-        await self.coordinator.async_request_refresh()
+        int_val = int(value)
+        self.coordinator.update_state_locally("audio_volume", int_val)
+        self.coordinator.async_send_command("set_volume", {"volume": int_val})

@@ -78,8 +78,8 @@ class WinAgentText(CoordinatorEntity[WinAgentCoordinator], TextEntity):
         self.async_write_ha_state()
 
         if self._command == "launch_url":
-            await self.coordinator.async_send_action("launch_url", {"url": value})
+            self.coordinator.async_send_command("launch_url", {"url": value})
         elif self._command == "send_keys":
-            await self.coordinator.async_send_action("send_keys", {"keys": value})
+            self.coordinator.async_send_command("send_keys", {"keys": value})
         elif self._command == "send_notification":
-            await self.coordinator.async_send_action("send_notification", {"title": "Home Assistant", "message": value})
+            self.coordinator.async_send_command("send_notification", {"title": "Home Assistant", "message": value})

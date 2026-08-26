@@ -2,17 +2,13 @@
   "config": {
     "step": {
       "user": {
-        "title": "Connect Windows Direct Agent",
-        "description": "Enter the IP address and port of your Windows PC running the ElectroBun Windows Agent.",
+        "title": "Windows Direct Agent Hub",
+        "description": "Connection is established directly from the ElectroBun desktop app on your PC. You only need to confirm your device identifier here.",
         "data": {
-          "host": "PC IP Address or Hostname",
-          "port": "Port",
-          "device_name": "Device Name"
+          "device_name": "Device Name",
+          "device_id": "Device Identifier"
         }
       }
-    },
-    "error": {
-      "cannot_connect": "Failed to connect to Windows Agent. Make sure the ElectroBun app is open and running on your PC."
     },
     "abort": {
       "already_configured": "This Windows PC is already configured."

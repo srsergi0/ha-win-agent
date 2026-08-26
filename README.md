@@ -5,13 +5,15 @@
 [![Platform](https://img.shields.io/badge/Windows-10%20%7C%2011-0078D6.svg?style=for-the-badge&logo=windows)](https://microsoft.com)
 [![ElectroBun](https://img.shields.io/badge/Desktop_App-ElectroBun-8b5cf6.svg?style=for-the-badge)](https://bun.sh)
 
-Integración oficial y aplicación de escritorio nativa **ElectroBun** para conectar y controlar tu PC con Windows directamente desde **Home Assistant** con latencia ultrabaja, cero dependencias de brokers MQTT externos y soporte completo para 19+ sensores, botones de control, sliders de volumen y servicios interactivos.
+Integración oficial y aplicación de escritorio nativa **ElectroBun** para conectar y controlar tu PC con Windows directamente desde **Home Assistant**.
+
+> **💡 Cero Configuración de IP en Home Assistant**: No necesitas ingresar la IP de tu PC en Home Assistant. Toda la conexión se configura de forma saliente desde la aplicación de escritorio ElectroBun en tu PC hacia la URL de tu Home Assistant.
 
 ---
 
 ## 🌟 Características Principales
 
-- 🚀 **Conexión Directa LAN Punto a Punto**: Comunicación en tiempo real (WebSocket + REST) entre la aplicación de escritorio y Home Assistant sin necesidad de instalar o mantener brokers MQTT.
+- 🚀 **Conexión Directa Saliente (Zero IP Config)**: La aplicación de tu PC se conecta directamente a la URL de Home Assistant vía WebSocket y REST. Funciona a través de cortafuegos, Wi-Fi dinámico (DHCP) o VPN.
 - 🎨 **Aplicación de Escritorio ElectroBun**:
   - Panel visual Glassmorphic Dark moderno.
   - Visor de tráfico y eventos en streaming en vivo con inspector de payloads JSON.
@@ -40,15 +42,15 @@ Integración oficial y aplicación de escritorio nativa **ElectroBun** para cone
 
 1. Abre **Home Assistant** y dirígete a **HACS** > **Integraciones**.
 2. Haz clic en los **3 puntos (esquina superior derecha)** y selecciona **Repositorios personalizados**.
-3. Pega la URL de este repositorio: `https://github.com/srsergi0/ha-win-agent` (o la URL de tu repo en GitHub).
+3. Pega la URL de este repositorio: `https://github.com/srsergi0/ha-win-agent`.
 4. En **Categoría**, selecciona `Integración` y haz clic en **Añadir**.
 5. Busca **Windows Direct Agent**, haz clic en **Descargar** y luego **reinicia Home Assistant**.
-6. En Home Assistant, ve a **Ajustes** > **Dispositivos y Servicios** > **Añadir Integración** y busca **Windows Direct Agent**.
-7. Ingresa la IP de tu PC con Windows (ej: `192.168.1.50`) y el puerto (por defecto: `8182`).
+6. En Home Assistant, ve a **Ajustes** > **Dispositivos y Servicios** > **Añadir Integración** y selecciona **Windows Direct Agent**.
+7. Solo confirma el nombre de tu dispositivo (¡no pide IP!) y haz clic en **Enviar**.
 
 ---
 
-## 💻 Configuración de la App de Escritorio ElectroBun
+## 💻 Configuración en la App ElectroBun (En tu PC)
 
 1. Inicia la aplicación en tu PC con Windows:
    ```powershell
@@ -56,16 +58,14 @@ Integración oficial y aplicación de escritorio nativa **ElectroBun** para cone
    bun run dev
    ```
 2. En la pestaña **Configuración HA**:
-   - Ingresa la URL de tu Home Assistant (ej. `http://192.168.1.100:8123`).
+   - Ingresa la **URL de tu Home Assistant** (ej. `http://192.168.1.100:8123` o `http://homeassistant.local:8123` o URL Nabu Casa).
    - Ingresa tu **Token de Acceso de Larga Duración** (obtenido en tu Perfil de Home Assistant > Tokens de acceso).
    - Haz clic en **Guardar y Conectar**.
-3. ¡Listo! Observa en la pestaña **Tráfico en Vivo** cómo todos los sensores y métricas se sincronizan instantáneamente.
+3. ¡Listo! Observa en la pestaña **Tráfico en Vivo** cómo todos los sensores y métricas se sincronizan instantáneamente con Home Assistant.
 
 ---
 
-## 🎛️ Tarjeta Lovelace Recomendada para tu Dashboard
-
-Puedes agregar esta tarjeta en tu panel de Home Assistant para visualizar el estado de tu PC:
+## 🎛️ Tarjeta Lovelace para tu Dashboard
 
 ```yaml
 type: entities

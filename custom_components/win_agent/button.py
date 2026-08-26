@@ -88,5 +88,5 @@ class WinAgentButton(CoordinatorEntity[WinAgentCoordinator], ButtonEntity):
         )
 
     async def async_press(self) -> None:
-        """Handle the button press."""
-        await self.coordinator.async_send_action(self._command)
+        """Handle the button press by broadcasting command."""
+        self.coordinator.async_send_command(self._command)

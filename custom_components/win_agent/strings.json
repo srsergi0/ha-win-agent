@@ -2,20 +2,16 @@
   "config": {
     "step": {
       "user": {
-        "title": "Connect Windows Direct Agent",
-        "description": "Enter the IP address and port of your Windows PC running the ElectroBun Windows Agent.",
+        "title": "Windows Direct Agent Hub",
+        "description": "La conexión se establece directamente desde la aplicación de escritorio ElectroBun en tu PC. Aquí solo necesitas confirmar el identificador de tu dispositivo.",
         "data": {
-          "host": "PC IP Address or Hostname",
-          "port": "Port (default: 8182)",
-          "device_name": "Device Name"
+          "device_name": "Nombre del Dispositivo (ej: Sergio PC)",
+          "device_id": "Identificador Único (ej: sergio_pc_agent)"
         }
       }
     },
-    "error": {
-      "cannot_connect": "Failed to connect to Windows Agent. Make sure the ElectroBun app is open and running on your PC."
-    },
     "abort": {
-      "already_configured": "This Windows PC is already configured in Home Assistant."
+      "already_configured": "Este PC con Windows ya está configurado en Home Assistant."
     }
   }
 }

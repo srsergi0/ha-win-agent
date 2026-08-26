@@ -44,21 +44,19 @@ class WinAgentMuteSwitch(CoordinatorEntity[WinAgentCoordinator], SwitchEntity):
     @property
     def is_on(self) -> bool | None:
         """Return true if audio is muted."""
-        if not self.coordinator.data:
-            return None
-        val = self.coordinator.data.get("audio_mute")
+        val = self.coordinator.sensor_data.get("audio_mute")
         if isinstance(val, bool):
             return val
         if isinstance(val, str):
             return val.upper() in ("ON", "TRUE", "1")
-        return bool(val)
+        return bool(val) if val is not None else False
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn on mute."""
-        await self.coordinator.async_send_action("mute_audio", {"state": True})
-        await self.coordinator.async_request_refresh()
+        self.coordinator.update_state_locally("audio_mute", True)
+        self.coordinator.async_send_command("mute_audio", {"state": True})
 
     async def async_turn_off(self, **kwargs: Any) -> None:
         """Turn off mute."""
-        await self.coordinator.async_send_action("mute_audio", {"state": False})
-        await self.coordinator.async_request_refresh()
+        self.coordinator.update_state_locally("audio_mute", False)
+        self.coordinator.async_send_command("mute_audio", {"state": False})

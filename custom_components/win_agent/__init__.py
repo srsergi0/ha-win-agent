@@ -12,11 +12,11 @@ from homeassistant.helpers import config_validation as cv
 from .const import (
     DOMAIN,
     PLATFORMS,
-    CONF_HOST,
-    CONF_PORT,
     CONF_DEVICE_ID,
     CONF_DEVICE_NAME,
-    DEFAULT_PORT,
+    DEFAULT_DEVICE_ID,
+    DEFAULT_NAME,
+    EVENT_WIN_AGENT_COMMAND,
 )
 from .coordinator import WinAgentCoordinator
 
@@ -32,6 +32,7 @@ SCHEMA_SHOW_DIALOG = vol.Schema({
     vol.Required("title"): cv.string,
     vol.Required("message"): cv.string,
     vol.Optional("timeout_sec", default=30): cv.positive_int,
+    vol.Optional("device_id"): cv.string,
     vol.Optional("buttons"): vol.All(cv.ensure_list, [vol.Schema({
         vol.Required("id"): cv.string,
         vol.Required("text"): cv.string,
@@ -42,18 +43,22 @@ SCHEMA_SHOW_DIALOG = vol.Schema({
 SCHEMA_SEND_NOTIFICATION = vol.Schema({
     vol.Required("title"): cv.string,
     vol.Required("message"): cv.string,
+    vol.Optional("device_id"): cv.string,
 })
 
 SCHEMA_LAUNCH_URL = vol.Schema({
     vol.Required("url"): cv.string,
+    vol.Optional("device_id"): cv.string,
 })
 
 SCHEMA_SEND_KEYS = vol.Schema({
     vol.Required("keys"): cv.string,
+    vol.Optional("device_id"): cv.string,
 })
 
 SCHEMA_RUN_POWERSHELL = vol.Schema({
     vol.Required("script"): cv.string,
+    vol.Optional("device_id"): cv.string,
 })
 
 async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
@@ -63,22 +68,26 @@ async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Windows Direct Agent from a config entry."""
-    host = entry.data[CONF_HOST]
-    port = entry.data.get(CONF_PORT, DEFAULT_PORT)
-    device_id = entry.data.get(CONF_DEVICE_ID, "win_pc")
-    device_name = entry.data.get(CONF_DEVICE_NAME, "Windows PC")
+    device_id = entry.data.get(CONF_DEVICE_ID, DEFAULT_DEVICE_ID)
+    device_name = entry.data.get(CONF_DEVICE_NAME, DEFAULT_NAME)
 
-    coordinator = WinAgentCoordinator(hass, host, port, device_id, device_name)
-    await coordinator.async_config_entry_first_refresh()
+    coordinator = WinAgentCoordinator(hass, device_id, device_name)
+    await coordinator.async_setup()
 
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][entry.entry_id] = coordinator
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
-    # Register custom services
+    # Register custom services that broadcast to the PC
+    def get_target_device_id(call_data: dict[str, Any]) -> str:
+        return call_data.get("device_id") or device_id
+
     async def handle_show_dialog(call: ServiceCall) -> None:
-        await coordinator.async_send_action("show_dialog", {
+        target = get_target_device_id(call.data)
+        hass.bus.async_fire(EVENT_WIN_AGENT_COMMAND, {
+            "device_id": target,
+            "command": "show_dialog",
             "title": call.data["title"],
             "message": call.data["message"],
             "timeoutSec": call.data.get("timeout_sec", 30),
@@ -86,23 +95,35 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         })
 
     async def handle_send_notification(call: ServiceCall) -> None:
-        await coordinator.async_send_action("send_notification", {
+        target = get_target_device_id(call.data)
+        hass.bus.async_fire(EVENT_WIN_AGENT_COMMAND, {
+            "device_id": target,
+            "command": "send_notification",
             "title": call.data["title"],
             "message": call.data["message"],
         })
 
     async def handle_launch_url(call: ServiceCall) -> None:
-        await coordinator.async_send_action("launch_url", {
+        target = get_target_device_id(call.data)
+        hass.bus.async_fire(EVENT_WIN_AGENT_COMMAND, {
+            "device_id": target,
+            "command": "launch_url",
             "url": call.data["url"],
         })
 
     async def handle_send_keys(call: ServiceCall) -> None:
-        await coordinator.async_send_action("send_keys", {
+        target = get_target_device_id(call.data)
+        hass.bus.async_fire(EVENT_WIN_AGENT_COMMAND, {
+            "device_id": target,
+            "command": "send_keys",
             "keys": call.data["keys"],
         })
 
     async def handle_run_powershell(call: ServiceCall) -> None:
-        await coordinator.async_send_action("run_powershell", {
+        target = get_target_device_id(call.data)
+        hass.bus.async_fire(EVENT_WIN_AGENT_COMMAND, {
+            "device_id": target,
+            "command": "run_powershell",
             "script": call.data["script"],
         })
 
@@ -116,6 +137,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
+    coordinator: WinAgentCoordinator = hass.data[DOMAIN].get(entry.entry_id)
+    if coordinator:
+        coordinator.cleanup()
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     if unload_ok:
         hass.data[DOMAIN].pop(entry.entry_id)

@@ -8,11 +8,12 @@ from homeassistant.components.binary_sensor import (
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import DOMAIN
+from .const import DOMAIN, SIGNAL_WIN_AGENT_UPDATE
 from .coordinator import WinAgentCoordinator
 
 BINARY_SENSOR_DESCRIPTIONS = [
@@ -80,6 +81,21 @@ class WinAgentBinarySensor(CoordinatorEntity[WinAgentCoordinator], BinarySensorE
         self._attr_icon = desc.get("icon")
         self._attr_device_class = desc.get("device_class")
 
+    async def async_added_to_hass(self) -> None:
+        """Register dispatcher update callback."""
+        await super().async_added_to_hass()
+        self.async_on_remove(
+            async_dispatcher_connect(
+                self.hass,
+                SIGNAL_WIN_AGENT_UPDATE.format(self.coordinator.device_id),
+                self._handle_update,
+            )
+        )
+
+    def _handle_update(self) -> None:
+        """Handle updated sensor data."""
+        self.async_write_ha_state()
+
     @property
     def device_info(self) -> DeviceInfo:
         """Return information about the device."""
@@ -93,11 +109,9 @@ class WinAgentBinarySensor(CoordinatorEntity[WinAgentCoordinator], BinarySensorE
     @property
     def is_on(self) -> bool | None:
         """Return true if the binary sensor is on."""
-        if not self.coordinator.data:
-            return None
-        val = self.coordinator.data.get(self._key)
+        val = self.coordinator.sensor_data.get(self._key)
         if isinstance(val, bool):
             return val
         if isinstance(val, str):
             return val.upper() in ("ON", "TRUE", "1")
-        return bool(val)
+        return bool(val) if val is not None else None

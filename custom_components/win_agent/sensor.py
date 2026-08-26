@@ -10,11 +10,12 @@ from homeassistant.components.sensor import (
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import PERCENTAGE, UnitOfTime
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import DOMAIN
+from .const import DOMAIN, SIGNAL_WIN_AGENT_UPDATE
 from .coordinator import WinAgentCoordinator
 
 SENSOR_DESCRIPTIONS = [
@@ -115,6 +116,21 @@ class WinAgentSensor(CoordinatorEntity[WinAgentCoordinator], SensorEntity):
         self._attr_device_class = desc.get("device_class")
         self._attr_state_class = desc.get("state_class")
 
+    async def async_added_to_hass(self) -> None:
+        """Register dispatcher update callback."""
+        await super().async_added_to_hass()
+        self.async_on_remove(
+            async_dispatcher_connect(
+                self.hass,
+                SIGNAL_WIN_AGENT_UPDATE.format(self.coordinator.device_id),
+                self._handle_update,
+            )
+        )
+
+    def _handle_update(self) -> None:
+        """Handle updated sensor data."""
+        self.async_write_ha_state()
+
     @property
     def device_info(self) -> DeviceInfo:
         """Return information about the device."""
@@ -128,6 +144,4 @@ class WinAgentSensor(CoordinatorEntity[WinAgentCoordinator], SensorEntity):
     @property
     def native_value(self) -> Any:
         """Return the state of the sensor."""
-        if not self.coordinator.data:
-            return None
-        return self.coordinator.data.get(self._key)
+        return self.coordinator.sensor_data.get(self._key)
